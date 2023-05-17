@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 
@@ -33,7 +34,7 @@ class Tawk extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _TawkState createState() => _TawkState();
+  State<Tawk> createState() => _TawkState();
 }
 
 class _TawkState extends State<Tawk> {
@@ -58,34 +59,21 @@ class _TawkState extends State<Tawk> {
       ''';
     }
 
-    _controller.runJavascript(javascriptString);
+    _controller.runJavaScript(javascriptString);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        WebView(
-          initialUrl: widget.directChatLink,
-          javascriptMode: JavascriptMode.unrestricted,
-          onWebViewCreated: (WebViewController webViewController) {
-            setState(() {
-              _controller = webViewController;
-            });
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
           },
-          navigationDelegate: (NavigationRequest request) {
-            if (request.url == 'about:blank' ||
-                request.url.contains('tawk.to')) {
-              return NavigationDecision.navigate;
-            }
-
-            if (widget.onLinkTap != null) {
-              widget.onLinkTap!(request.url);
-            }
-
-            return NavigationDecision.prevent;
-          },
-          onPageFinished: (_) {
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {
             if (widget.visitor != null) {
               _setUser(widget.visitor!);
             }
@@ -94,15 +82,38 @@ class _TawkState extends State<Tawk> {
               widget.onLoad!();
             }
 
-            setState(() {
+           
               _isLoading = false;
-            });
+          setState(() {   });
+          },
+          
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            // log(request.url);
+            // if (request.url == 'about:blank' ||
+            //     request.url.contains('tawk.to')) {
+            //   return NavigationDecision.navigate;
+            // }
+
+            if (widget.onLinkTap != null) {
+              widget.onLinkTap!(request.url);
+            }
+            return NavigationDecision.prevent;
           },
         ),
+      )
+      ..loadRequest(Uri.parse(widget.directChatLink));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        WebViewWidget(controller: _controller),
         _isLoading
             ? widget.placeholder ??
                 const Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(color: Colors.blue),
                 )
             : Container(),
       ],

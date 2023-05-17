@@ -17,10 +17,10 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
         body: Tawk(
-          directChatLink: 'YOUR_DIRECT_CHAT_LINK',
+          directChatLink:'YOUR_DIRECT_CHAT_LINK',
           visitor: TawkVisitor(
-            name: 'Ayoub AMINE',
-            email: 'ayoubamine2a@gmail.com',
+            name: 'Test User',
+            email: 'testuser@gmail.com',
           ),
           onLoad: () {
             print('Hello Tawk!');
